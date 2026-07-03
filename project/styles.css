@@ -1,0 +1,161 @@
+/* CSS Variables for Dynamic Time-based Themes */
+:root {
+    /* NIGHT THEME (Default 21:00 - 05:59) */
+    --bg-page: #020617;
+    --bg-panel: rgba(15, 23, 42, 0.85);
+    --bg-panel-hover: rgba(51, 65, 85, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: rgba(51, 65, 85, 0.6);
+    --accent-primary: #10b981;
+    --accent-secondary: #14b8a6;
+    --accent-glow: rgba(16, 185, 129, 0.5);
+
+    /* Map specific */
+    --map-sphere: #0f172a;
+    --map-graticule: #3d6b8e;
+    --map-country: #334155;
+    --map-country-stroke: #020617;
+    --map-country-hover: #475569;
+    --map-visited: #0099ff;
+    --map-visited-stroke: #064e3b;
+    --map-visited-hover: #1e00ff;
+}
+
+[data-theme="morning"] {
+    /* MORNING THEME (06:00 - 11:59) */
+    --bg-page: #f0f9ff;
+    --bg-panel: rgba(255, 255, 255, 0.9);
+    --bg-panel-hover: rgba(224, 242, 254, 0.8);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: rgba(203, 213, 225, 0.8);
+    --accent-primary: #f59e0b; /* Amber */
+    --accent-secondary: #fb923c; /* Orange */
+    --accent-glow: rgba(245, 158, 11, 0.5);
+
+    --map-sphere: #bae6fd;
+    --map-graticule: #4f90ae;
+    --map-country: #ffffff;
+    --map-country-stroke: #94a3b8;
+    --map-country-hover: #f1f5f9;
+    --map-visited: #f59e0b;
+    --map-visited-stroke: #b45309;
+    --map-visited-hover: #fbbf24;
+}
+
+[data-theme="afternoon"] {
+    /* AFTERNOON THEME (12:00 - 16:59) */
+    --bg-page: #e0f2fe;
+    --bg-panel: rgba(255, 255, 255, 0.95);
+    --bg-panel-hover: rgba(219, 234, 254, 0.9);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: rgba(148, 163, 184, 0.5);
+    --accent-primary: #3b82f6; /* Blue */
+    --accent-secondary: #06b6d4; /* Cyan */
+    --accent-glow: rgba(59, 130, 246, 0.5);
+
+    --map-sphere: #bfdbfe;
+    --map-graticule: #93c5fd;
+    --map-country: #f8fafc;
+    --map-country-stroke: #cbd5e1;
+    --map-country-hover: #e2e8f0;
+    --map-visited: #3b82f6;
+    --map-visited-stroke: #1e40af;
+    --map-visited-hover: #60a5fa;
+}
+
+[data-theme="sunset"] {
+    /* SUNSET THEME (17:00 - 20:59) */
+    --bg-page: #2a0f18; /* Dark warm purple */
+    --bg-panel: rgba(76, 5, 25, 0.85); /* Rose 900 */
+    --bg-panel-hover: rgba(136, 19, 55, 0.6);
+    --text-main: #fff7ed;
+    --text-muted: #fecdd3;
+    --border-color: rgba(101, 31, 51, 0.6);
+    --accent-primary: #f97316; /* Orange */
+    --accent-secondary: #facc15; /* Yellow */
+    --accent-glow: rgba(249, 115, 22, 0.5);
+
+    --map-sphere: #45212b;
+    --map-graticule: #b91748;
+    --map-country: #FFE8B4;
+    --map-country-stroke: #2a0f18;
+    --map-country-hover: #be123c;
+    --map-visited: #f97316;
+    --map-visited-stroke: #7c2d12;
+    --map-visited-hover: #fb923c;
+}
+
+/* Global smooth transitions for theme switches */
+body, aside, div, input, button, span, h1, h2, p, svg {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.5s;
+    transition-timing-function: ease;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+}
+
+/* SVG Map Styling */
+#map-container svg {
+    cursor: grab;
+}
+#map-container svg:active {
+    cursor: grabbing;
+}
+
+.sphere {
+    fill: var(--map-sphere);
+    stroke: var(--map-graticule);
+    vector-effect: non-scaling-stroke;
+    transition: fill 0.5s ease, stroke 0.5s ease;
+}
+
+.graticule {
+    fill: none;
+    stroke: var(--map-graticule);
+    stroke-width: 0.5px;
+    vector-effect: non-scaling-stroke;
+    transition: stroke 0.5s ease;
+}
+
+.country {
+    fill: var(--map-country);
+    stroke: var(--map-country-stroke);
+    stroke-width: 0.5px;
+    vector-effect: non-scaling-stroke;
+    transition: fill 0.3s ease, stroke 0.5s ease;
+}
+
+.country:hover {
+    fill: var(--map-country-hover);
+    cursor: pointer;
+}
+
+.country.visited {
+    fill: var(--map-visited);
+    stroke: var(--map-visited-stroke);
+}
+
+.country.visited:hover {
+    fill: var(--map-visited-hover);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}

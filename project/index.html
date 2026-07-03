@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeTrotter | World Tracker</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- D3.js and TopoJSON -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+
+    <!-- Extracted styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="overflow-hidden antialiased font-sans flex h-screen w-screen relative">
+
+    <!-- Loading Screen -->
+    <div id="loader" class="fixed inset-0 bg-[var(--bg-page)] flex flex-col items-center justify-center z-[100] transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-[var(--border-color)] border-t-[var(--accent-primary)] rounded-full animate-spin mb-6"></div>
+        <h2 class="text-xl font-bold tracking-widest text-[var(--accent-primary)] animate-pulse">MAPPING THE WORLD</h2>
+    </div>
+
+    <!-- Map Container -->
+    <main class="w-full h-full absolute inset-0 z-0" id="map-container"></main>
+
+    <!-- Open Sidebar Button -->
+    <button id="open-sidebar-btn" class="absolute top-4 left-4 md:top-8 md:left-8 bg-[var(--bg-panel)] backdrop-blur p-4 rounded-xl text-[var(--text-main)] shadow-2xl hover:bg-[var(--bg-panel-hover)] hover:text-[var(--accent-primary)] border border-[var(--border-color)] z-10 group hidden" title="Open Menu">
+        <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+
+    <!-- Floating UI Panel (Sidebar) -->
+    <aside id="sidebar" class="absolute top-4 left-4 md:top-8 md:left-8 w-[calc(100%-2rem)] md:w-96 max-h-[calc(100%-2rem)] md:max-h-[calc(100%-4rem)] bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-color)] rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden transition-transform duration-300 ease-in-out">
+
+        <!-- Header -->
+        <div class="px-6 pt-8 pb-4 shrink-0 relative">
+            <!-- Close Button -->
+            <button id="close-sidebar-btn" class="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-red-400 bg-[var(--bg-panel-hover)] rounded-full" title="Close Menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-[var(--bg-panel-hover)] flex items-center justify-center text-[var(--accent-primary)] border border-[var(--border-color)]">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]">GlobeTrotter</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p class="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">Your Travel Canvas</p>
+                        <span class="text-[var(--border-color)] text-xs">|</span>
+                        <div class="flex items-center gap-1 text-[var(--accent-primary)]" title="Local Time">
+                            <span id="time-icon" class="flex items-center"></span>
+                            <span id="time-text" class="text-xs font-bold tracking-wide">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-[var(--text-muted)] text-sm font-medium">World Explored</span>
+                    <span id="visited-count" class="text-[var(--accent-primary)] font-bold text-lg">0 / 0</span>
+                </div>
+                <div class="w-full h-2.5 bg-[var(--border-color)] rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] transition-all duration-1000 ease-out w-0" style="box-shadow: 0 0 10px var(--accent-glow);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative px-6 pb-2 shrink-0">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" id="search-input" placeholder="Search a country..." class="w-full bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-main)] rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[var(--accent-primary)] transition-all placeholder-[var(--text-muted)] shadow-inner">
+            </div>
+            <!-- Search Results Dropdown -->
+            <div id="search-results" class="absolute top-full left-6 right-6 mt-2 bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-color)] rounded-xl shadow-2xl max-h-56 overflow-y-auto hidden z-20 divide-y divide-[var(--border-color)]"></div>
+        </div>
+
+        <!-- Visited List -->
+        <div class="flex-1 overflow-y-auto mt-2 px-6 pb-6 space-y-2" id="visited-list">
+            <!-- List items populated by JS -->
+        </div>
+    </aside>
+
+    <!-- Reset Zoom Button -->
+    <button id="reset-zoom" class="absolute bottom-8 right-8 bg-[var(--bg-panel)] backdrop-blur p-4 rounded-full text-[var(--text-main)] shadow-2xl hover:bg-[var(--bg-panel-hover)] hover:text-[var(--accent-primary)] border border-[var(--border-color)] z-10 group" title="Reset Map View">
+        <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+    </button>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="fixed opacity-0 pointer-events-none bg-[var(--bg-panel)] backdrop-blur-sm text-[var(--accent-primary)] px-4 py-2 rounded-xl text-sm font-bold border border-[var(--border-color)] shadow-2xl z-50 transition-opacity duration-200" style="left: 0; top: 0; transform: translate(-50%, -150%); mt: -10px;">
+    </div>
+
+    <!-- Application Logic (compiled from script.ts) -->
+    <script src="script.js"></script>
+</body>
+</html>
